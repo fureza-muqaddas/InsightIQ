@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Report — {{ file.original_name }}{% endblock %}
+{% block content %}
+<div class="report-layout">
+  <div class="report-header">
+    <a href="/analyze/{{ file.id }}" class="back-link">← Back to Analysis</a>
+    <h1>Analysis Report</h1>
+    <p class="subtitle">{{ file.original_name }}</p>
+    <button class="btn btn-primary" id="generateBtn" onclick="generateReport()">
+      {% if report %}Regenerate Report{% else %}Generate Report{% endif %}
+    </button>
+  </div>
+
+  <div id="reportContent">
+    {% if report %}
+    <div class="report-body">{{ report.content | replace('\n', '<br>') | safe }}</div>
+    {% else %}
+    <div class="empty-state">
+      <p>Click "Generate Report" to create an AI-powered analysis of your dataset.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+const fileId = {{ file.id }};
+function generateReport() {
+  const btn = document.getElementById('generateBtn');
+  btn.textContent = 'Generating...';
+  btn.disabled = true;
+  fetch(`/report/${fileId}`, { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.content) {
+        document.getElementById('reportContent').innerHTML = 
+          `<div class="report-body">${data.content.replace(/\n/g, '<br>')}</div>`;
+      }
+      btn.textContent = 'Regenerate Report';
+      btn.disabled = false;
+    });
+}
+</script>
+{% endblock %}

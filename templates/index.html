@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — AI Data Analyst{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Data Analysis Dashboard</h1>
+  <p class="subtitle">Upload your data and let AI uncover insights</p>
+</div>
+
+<div class="upload-zone" id="uploadZone">
+  <div class="upload-icon">↑</div>
+  <p class="upload-text">Drop your file here or <label for="fileInput" class="upload-link">browse</label></p>
+  <p class="upload-hint">Supports CSV, Excel (.xlsx), JSON — up to 16MB</p>
+  <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,.json" style="display:none">
+  <div class="upload-progress" id="uploadProgress" style="display:none">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span id="uploadStatus">Uploading...</span>
+  </div>
+</div>
+
+{% if files %}
+<div class="section-header">
+  <h2>Recent Datasets</h2>
+</div>
+<div class="files-grid">
+  {% for file in files %}
+  <div class="file-card">
+    <div class="file-icon {{ file.file_type }}">{{ file.file_type.upper() }}</div>
+    <div class="file-info">
+      <h3>{{ file.original_name }}</h3>
+      <p>{{ "{:,}".format(file.row_count) }} rows · {{ file.col_count }} columns</p>
+      <p class="file-date">{{ file.uploaded_at.strftime('%b %d, %Y') }}</p>
+    </div>
+    <div class="file-actions">
+      <a href="/analyze/{{ file.id }}" class="btn btn-primary">Analyze</a>
+      <a href="/report/{{ file.id }}" class="btn btn-secondary">Report</a>
+      <button class="btn btn-danger" onclick="deleteFile({{ file.id }})">✕</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <p>No datasets yet. Upload a file to get started.</p>
+</div>
+{% endif %}
+{% endblock %}

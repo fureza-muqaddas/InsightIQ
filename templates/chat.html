@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Analyze — {{ file.original_name }}{% endblock %}
+{% block content %}
+<div class="analyze-layout">
+  <div class="analyze-header">
+    <a href="/" class="back-link">← Back</a>
+    <h1>{{ file.original_name }}</h1>
+    <div class="file-meta">
+      <span>{{ "{:,}".format(file.row_count) }} rows</span>
+      <span>{{ file.col_count }} columns</span>
+      <a href="/report/{{ file.id }}" class="btn btn-primary btn-sm">Generate Report</a>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="charts-panel">
+      <h2>Visualizations</h2>
+      <div id="chartsContainer"></div>
+    </div>
+
+    <div class="chat-panel">
+      <h2>AI Chat</h2>
+      <div class="chat-messages" id="chatMessages">
+        <div class="message assistant">
+          <div class="msg-content">Hello! I've analyzed your dataset. Ask me anything about the data — patterns, statistics, comparisons, or specific questions.</div>
+        </div>
+        {% for msg in chat_history %}
+        <div class="message {{ msg.role }}">
+          <div class="msg-content">{{ msg.message }}</div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="chat-input-area">
+        <textarea id="chatInput" placeholder="Ask about your data... (e.g. What are the top 5 values? What trends do you see?)" rows="2"></textarea>
+        <button id="sendBtn" onclick="sendMessage()">Send ↗</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const chartData = {{ chart_data | safe }};
+const fileId = {{ file.id }};
+</script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}
