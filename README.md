@@ -105,8 +105,8 @@ python app.py
 ## 👤 Author
 
 **Fureza Muqaddas**  
-AI & Data Science Professional — Edmonton, Alberta  
-[GitHub](https://github.com/fureza-muqaddas) · [LinkedIn](https://linkedin.com/in/fureza_muqaddas/)
+AI & Data Science Professional 
+[GitHub](https://github.com/fureza-muqaddas) · [LinkedIn](https://www.linkedin.com/in/fureza-muqaddas/)
 
 ## 📄 License
 MIT
