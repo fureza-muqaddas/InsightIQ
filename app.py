@@ -106,6 +106,8 @@ def chat(file_id):
         
         return jsonify({"response": response})
     except Exception as e:
+        import traceback
+        print(traceback.format_exc())
         db.close()
         return jsonify({"error": str(e)}), 500
 
