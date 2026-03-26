@@ -13,7 +13,7 @@
 
   <div id="reportContent">
     {% if report %}
-    <div class="report-body">{{ report.content | replace('\n', '<br>') | safe }}</div>
+    <div class="report-body">{{ report.content | replace('**', '') | replace('*', '') | replace('### ', '') | replace('## ', '') | replace('# ', '') | replace('====================================', '') | replace('\n', '<br>') | safe }}</div>
     {% else %}
     <div class="empty-state">
       <p>Click "Generate Report" to create an AI-powered analysis of your dataset.</p>
@@ -32,8 +32,14 @@ function generateReport() {
     .then(r => r.json())
     .then(data => {
       if (data.content) {
+        const clean = data.content
+          .replace(/\*\*/g, '')
+          .replace(/\*/g, '')
+          .replace(/#{1,6}\s/g, '')
+          .replace(/={3,}/g, '')
+          .replace(/\n/g, '<br>');
         document.getElementById('reportContent').innerHTML = 
-          `<div class="report-body">${data.content.replace(/\n/g, '<br>')}</div>`;
+          `<div class="report-body">${clean}</div>`;
       }
       btn.textContent = 'Regenerate Report';
       btn.disabled = false;

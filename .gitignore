@@ -1,1 +1,7 @@
 .env
+__pycache__/
+*.pyc
+database/analysis.db
+static/uploads/
+*.egg-info/
+.anaconda/

@@ -1,9 +1,26 @@
-import anthropic
 import pandas as pd
 import json
+import requests
 from config import Config
 
-client = anthropic.Anthropic(api_key=Config.ANTHROPIC_API_KEY)
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODEL = "llama-3.3-70b-versatile"
+
+def groq_chat(system_prompt: str, messages: list) -> str:
+    headers = {
+        "Authorization": f"Bearer {Config.GROQ_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": GROQ_MODEL,
+        "max_tokens": 2048,
+        "messages": [{"role": "system", "content": system_prompt}] + messages,
+    }
+    response = requests.post(GROQ_API_URL, headers=headers, json=payload)
+    print("GROQ STATUS:", response.status_code)
+    print("GROQ RESPONSE:", response.text)
+    response.raise_for_status()
+    return response.json()["choices"][0]["message"]["content"]
 
 def load_dataframe(filepath: str) -> pd.DataFrame:
     if filepath.endswith(".csv"):
@@ -41,18 +58,10 @@ Instructions:
 - Answer questions about the data clearly and concisely
 - When asked for calculations, show the result
 - Suggest insights and patterns you notice
-- If asked to create a chart, describe it clearly
 - Always be specific with numbers from the actual data"""
 
     api_messages = messages + [{"role": "user", "content": user_message}]
-
-    response = client.messages.create(
-        model="claude-opus-4-5",
-        max_tokens=2048,
-        system=system_prompt,
-        messages=api_messages,
-    )
-    return response.content[0].text
+    return groq_chat(system_prompt, api_messages)
 
 def generate_report(filepath: str) -> dict:
     df = load_dataframe(filepath)
@@ -75,19 +84,14 @@ Generate a report with these sections:
 6. Recommendations
 7. Conclusion
 
-Format each section clearly. Be specific with numbers and percentages from the data."""
+Be specific with numbers and percentages from the data."""
 
-    response = client.messages.create(
-        model="claude-opus-4-5",
-        max_tokens=4096,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    
-    report_text = response.content[0].text
+    report_text = groq_chat("You are a professional data analyst.", [{"role": "user", "content": prompt}])
+
     sections = {}
     current_section = "overview"
     current_content = []
-    
+
     for line in report_text.split("\n"):
         if line.startswith("#") or (line and line[0].isdigit() and "." in line[:3]):
             if current_content:
@@ -96,10 +100,10 @@ Format each section clearly. Be specific with numbers and percentages from the d
             current_content = []
         else:
             current_content.append(line)
-    
+
     if current_content:
         sections[current_section] = "\n".join(current_content).strip()
-    
+
     return {"full_report": report_text, "sections": sections}
 
 def generate_chart_data(filepath: str, chart_type: str = "auto") -> dict:
